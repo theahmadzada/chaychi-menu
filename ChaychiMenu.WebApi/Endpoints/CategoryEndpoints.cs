@@ -3,6 +3,7 @@ using MediatR;
 using ChaychiMenu.Application.Commands.Category;
 using ChaychiMenu.Application.Dto;
 using ChaychiMenu.Application.Queries.Category;
+using ChaychiMenu.Domain;
 using ChaychiMenu.WebApi.Extensions;
 using ChaychiMenu.WebApi.Filters;
 
@@ -29,6 +30,9 @@ public static class CategoryEndpoints
             };
             var result = await mediatr.Send(command, cancellationToken);
             return result.Match(value => Results.Ok(value), errors => errors.ToProblem());
+        }).RequireAuthorization(options =>
+        {
+            options.RequireRole(UserRole.Owner);
         }).AddEndpointFilter<RequireAppUserFilter>();
 
         group.MapGet("/{slug}", async (

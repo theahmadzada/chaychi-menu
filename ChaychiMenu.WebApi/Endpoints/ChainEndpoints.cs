@@ -35,7 +35,7 @@ public static class ChainEndpoints
             ISender mediator,
             CancellationToken cancellationToken) =>
         {
-            var query = new GetChainByIdQuery() { Id = id, OwnerId = (Guid)httpContext.Items["AppUserId"]! };
+            var query = new GetChainByIdQuery() { Id = id, AppUserId = (Guid)httpContext.Items["AppUserId"]! };
             var result = await mediator.Send(query, cancellationToken);
             return result.Match(value => Results.Ok(value), errors => errors.ToProblem());
         }).AddEndpointFilter<RequireAppUserFilter>()

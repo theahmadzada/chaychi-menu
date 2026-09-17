@@ -10,12 +10,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ChaychiMenu.Application.Handlers.Chain;
 
-public class GetChainByIdCommandHandler(AppDbContext context) : IRequestHandler<GetChainByIdQuery, ErrorOr<GetChainByIdDto>>
+public class GetChainByIdQueryHandler(AppDbContext context) : IRequestHandler<GetChainByIdQuery, ErrorOr<GetChainByIdDto>>
 {
     public async Task<ErrorOr<GetChainByIdDto>> Handle(GetChainByIdQuery request, CancellationToken cancellationToken)
     {
         var chain = await context.Chains
-            .Where(x => x.Owner.Id == request.OwnerId && x.Id == request.Id)
+            .Where(x => x.Owner.AppUserId == request.AppUserId && x.Id == request.Id)
             .Select(x => new GetChainByIdDto()
             {
                 Chain = new ChainDto() { Id = x.Id, Name = x.Name },

@@ -23,25 +23,7 @@ public static class OwnerEndpoints
         {
             var result = await mediator.Send(command, cancellationToken);
             return result.Match(value => Results.Ok(value), errors => errors.ToProblem());
-        });
-        
-        group.MapPost("/otp", async (
-            GenerateTelegramOtpCommand request,
-            ISender mediator,
-            CancellationToken cancellationToken) =>
-        {
-            var result = await mediator.Send(request, cancellationToken);
-            return result.Match(value => Results.Ok(value), errors => errors.ToProblem());
-        });
-        
-        group.MapPost("/otp/validate", async (
-            ValidateOtpCommand request,
-            ISender mediator,
-            CancellationToken cancellationToken) =>
-        {
-            var result = await mediator.Send(request, cancellationToken);
-            return result.Match(value => Results.Ok(value), errors => errors.ToProblem());
-        });
+        }).RequireAuthorization(policy => policy.RequireRole(UserRole.Admin));
         
         group.MapPatch("/{id}", async (
             Guid id,
