@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using ChaychiMenu.Application.Commands.MenuItem;
 using ChaychiMenu.Application.Dto;
 using ChaychiMenu.Application.Queries.MenuItem;
+using ChaychiMenu.Domain;
 using ChaychiMenu.WebApi.Extensions;
 using ChaychiMenu.WebApi.Filters;
 
@@ -36,7 +37,8 @@ public static class MenuItemEndpoints
                 };
                 var result = await mediator.Send(request, cancellationToken);
                 return result.Match(value => Results.Ok(value), errors => errors.ToProblem());
-            }).AddEndpointFilter<RequireAppUserFilter>()
+            }).RequireAuthorization(options => options.RequireRole(UserRole.Owner))
+            .AddEndpointFilter<RequireAppUserFilter>()
             .AddEndpointFilter<RequireAppRoleFilter>()
             .DisableAntiforgery();
 
@@ -56,8 +58,9 @@ public static class MenuItemEndpoints
             };
             var result = await mediator.Send(command, cancellationToken);
             return result.Match(value => Results.Ok(value), errors => errors.ToProblem());
-        }).AddEndpointFilter<RequireAppUserFilter>()
-        .AddEndpointFilter<RequireAppRoleFilter>();
+        }).RequireAuthorization(options => options.RequireRole(UserRole.Owner))
+            .AddEndpointFilter<RequireAppUserFilter>()
+            .AddEndpointFilter<RequireAppRoleFilter>();
 
         group.MapGet("/{id}", async (
             Guid id,

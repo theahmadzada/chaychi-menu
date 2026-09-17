@@ -1,4 +1,8 @@
+using System.Security.Claims;
+
 using ChaychiMenu.Application.Commands.Owner;
+using ChaychiMenu.Application.Dto;
+using ChaychiMenu.Application.ServiceContracts;
 
 using ErrorOr;
 
@@ -11,9 +15,10 @@ namespace ChaychiMenu.Application.Handlers.Owner;
 
 public class ValidateOtpCommandHandler(
     IDistributedCache cache,
-    UserManager<Domain.Entities.AppUser> userManager) : IRequestHandler<ValidateOtpCommand, ErrorOr<bool>>
+    UserManager<Domain.Entities.AppUser> userManager,
+    ITokenService tokenService) : IRequestHandler<ValidateOtpCommand, ErrorOr<AuthDto>>
 {
-    public async Task<ErrorOr<bool>> Handle(ValidateOtpCommand request, CancellationToken cancellationToken)
+    public async Task<ErrorOr<AuthDto>> Handle(ValidateOtpCommand request, CancellationToken cancellationToken)
     {
         var cacheKey = $"tg_otp:{request.Otp}";
         var userId = await cache.GetStringAsync(cacheKey, cancellationToken);
@@ -32,6 +37,30 @@ public class ValidateOtpCommandHandler(
 
         await cache.RemoveAsync(cacheKey, cancellationToken);
 
-        return true;
+        var roles = await userManager.GetRolesAsync(user);
+        var claims = new List<Claim>([
+            new Claim(ClaimTypes.Email, user.Email!),
+            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new Claim("jti", Guid.NewGuid().ToString()),
+        ]);
+        claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
+
+        var accessTokenData = tokenService.GenerateAccessToken(claims);
+        var refreshTokenData = tokenService.GenerateRefreshToken();
+
+        user.RefreshToken = refreshTokenData.Token;
+        user.RefreshTokenExpires = refreshTokenData.Expires;
+        
+        return new AuthDto()
+        {
+            Id = user.Id,
+            FirstName = user.FirstName,
+            LastName = user.LastName,
+            Email = user.Email!,
+            AccessToken = accessTokenData.Token,
+            AccessTokenExpiration = accessTokenData.Expires,
+            RefreshToken = refreshTokenData.Token,
+            RefreshTokenExpiration = refreshTokenData.Expires,
+        };
     }
 }

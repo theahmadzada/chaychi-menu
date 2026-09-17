@@ -1,3 +1,5 @@
+using ChaychiMenu.Application.Dto;
+
 using ErrorOr;
 
 using FluentValidation;
@@ -6,7 +8,7 @@ using MediatR;
 
 namespace ChaychiMenu.Application.Commands.Owner;
 
-public record ValidateOtpCommand() : IRequest<ErrorOr<bool>>
+public record ValidateOtpCommand() : IRequest<ErrorOr<AuthDto>>
 {
     public required string Otp { get; init; }
     public long TelegramId { get; init; }

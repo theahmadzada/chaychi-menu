@@ -13,7 +13,7 @@ using ChaychiMenu.Infrastructure.ServiceContracts;
 
 namespace ChaychiMenu.Application.Handlers.MenuItem;
 
-public class MenuItemCommandHandler(
+public class CreateMenuItemCommandHandler(
     AppDbContext dbContext, 
     IFileStorageService storage) : IRequestHandler<CreateMenuItemCommand, ErrorOr<MenuItemDto>>
 {

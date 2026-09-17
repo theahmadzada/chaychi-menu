@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 using ChaychiMenu.Application.Commands.Restaurant;
 using ChaychiMenu.Application.Dto;
+using ChaychiMenu.Domain;
 using ChaychiMenu.WebApi.Extensions;
 using ChaychiMenu.WebApi.Filters;
 
@@ -24,7 +25,8 @@ public static class RestaurantEndpoints
             var command = new CreateRestaurantCommand() { Name = request.Name, AppUserId = (Guid)httpContext.Items["AppUserId"]! };
             var result = await mediator.Send(command, cancellationToken);
             return result.Match(value => Results.Ok(value), errors => errors.ToProblem());
-        }).AddEndpointFilter<RequireAppUserFilter>();
+        }).RequireAuthorization(policy => policy.RequireRole(UserRole.Owner))
+            .AddEndpointFilter<RequireAppUserFilter>();
         
         return app;
     }

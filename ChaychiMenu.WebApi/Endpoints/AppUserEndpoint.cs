@@ -1,6 +1,7 @@
 using MediatR;
 
 using ChaychiMenu.Application.Commands.AppUser;
+using ChaychiMenu.Application.Commands.Owner;
 using ChaychiMenu.WebApi.Extensions;
 
 namespace ChaychiMenu.WebApi.Endpoints;
@@ -17,6 +18,24 @@ public static class AppUserEndpoint
             CancellationToken cancellationToken) =>
         {
             var result = await mediator.Send(command, cancellationToken);
+            return result.Match(value => Results.Ok(value), errors => errors.ToProblem());
+        });
+        
+        group.MapPost("/otp", async (
+            GenerateTelegramOtpCommand request,
+            ISender mediator,
+            CancellationToken cancellationToken) =>
+        {
+            var result = await mediator.Send(request, cancellationToken);
+            return result.Match(value => Results.Ok(value), errors => errors.ToProblem());
+        });
+        
+        group.MapPost("/otp/validate", async (
+            ValidateOtpCommand request,
+            ISender mediator,
+            CancellationToken cancellationToken) =>
+        {
+            var result = await mediator.Send(request, cancellationToken);
             return result.Match(value => Results.Ok(value), errors => errors.ToProblem());
         });
         
