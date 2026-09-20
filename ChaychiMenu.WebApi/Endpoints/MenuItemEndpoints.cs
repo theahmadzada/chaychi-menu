@@ -37,7 +37,7 @@ public static class MenuItemEndpoints
                 };
                 var result = await mediator.Send(request, cancellationToken);
                 return result.Match(value => Results.Ok(value), errors => errors.ToProblem());
-            }).RequireAuthorization(options => options.RequireRole(UserRole.Owner))
+            })//.RequireAuthorization(options => options.RequireRole(UserRole.Owner))
             .AddEndpointFilter<RequireAppUserFilter>()
             .AddEndpointFilter<RequireAppRoleFilter>()
             .DisableAntiforgery();
@@ -58,7 +58,7 @@ public static class MenuItemEndpoints
             };
             var result = await mediator.Send(command, cancellationToken);
             return result.Match(value => Results.Ok(value), errors => errors.ToProblem());
-        }).RequireAuthorization(options => options.RequireRole(UserRole.Owner))
+        })//.RequireAuthorization(options => options.RequireRole(UserRole.Owner))
             .AddEndpointFilter<RequireAppUserFilter>()
             .AddEndpointFilter<RequireAppRoleFilter>();
 

@@ -47,7 +47,7 @@ public class TokenService(
         return new TokenDto()
         {
             Token = token,
-            Expires = DateTimeOffset.UtcNow.AddMinutes(options.ValidFor)
+            Expires = DateTimeOffset.UtcNow.AddDays(options.ValidFor)
         };
     }
 }

@@ -23,7 +23,7 @@ public static class OwnerEndpoints
         {
             var result = await mediator.Send(command, cancellationToken);
             return result.Match(value => Results.Ok(value), errors => errors.ToProblem());
-        }).RequireAuthorization(policy => policy.RequireRole(UserRole.Admin));
+        });//.RequireAuthorization(policy => policy.RequireRole(UserRole.Admin));
         
         group.MapPatch("/{id}", async (
             Guid id,
@@ -34,7 +34,7 @@ public static class OwnerEndpoints
             var command = new UpdateOwnerCommand { AppUserId = id, Document = dto.Document };
             var result = await mediator.Send(command, cancellationToken);
             return result.Match(value => Results.Ok(value), errors => errors.ToProblem());
-        }).RequireAuthorization(policy => policy.RequireRole(UserRole.Owner));
+        });//.RequireAuthorization(policy => policy.RequireRole(UserRole.Owner));
 
         group.MapPost("/password", async (
             [FromBody] ChangePasswordDto dto,
@@ -44,26 +44,29 @@ public static class OwnerEndpoints
         {
             var command = new ChangeOwnerPasswordCommand()
             {
-                AppUserId = (Guid)httpContext.Items["AppUserId"]!, OldPassword = dto.OldPassword, NewPassword = dto.NewPassword
+                AppUserId = (Guid)httpContext.Items["AppUserId"]!,
+                OldPassword = dto.OldPassword,
+                NewPassword = dto.NewPassword
             };
             var result = await mediator.Send(command, cancellationToken);
             return result.Match(value => Results.Ok(value), errors => errors.ToProblem());
-        }).AddEndpointFilter<RequireAppUserFilter>()
-            .RequireAuthorization(policy => policy.RequireRole(UserRole.Owner));
+        }).AddEndpointFilter<RequireAppUserFilter>();
+            //.RequireAuthorization(policy => policy.RequireRole(UserRole.Owner));
 
-        group.MapDelete("/{id}", async (
-            Guid id,
-            ISender mediator,
-            CancellationToken cancellationToken) =>
-        {
-            var command = new DeleteOwnerCommand { AppUserId = id };
-            var result = await mediator.Send(command, cancellationToken);
-            return result.Match(value => Results.Ok(value), errors => errors.ToProblem());
-        }).RequireAuthorization(policy =>
-        {
-            policy.RequireRole(UserRole.Owner);
-            policy.RequireRole(UserRole.Admin);
-        });
+            group.MapDelete("/{id}", async (
+                Guid id,
+                ISender mediator,
+                CancellationToken cancellationToken) =>
+            {
+                var command = new DeleteOwnerCommand { AppUserId = id };
+                var result = await mediator.Send(command, cancellationToken);
+                return result.Match(value => Results.Ok(value), errors => errors.ToProblem());
+            });
+        //     .RequireAuthorization(policy =>
+        // {
+        //     policy.RequireRole(UserRole.Owner);
+        //     policy.RequireRole(UserRole.Admin);
+        // });
 
         return app;
     }
